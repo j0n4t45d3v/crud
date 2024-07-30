@@ -7,27 +7,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/j0n4t45d3v/crud/internal/dto"
 	"github.com/j0n4t45d3v/crud/internal/entity"
 	"github.com/j0n4t45d3v/crud/internal/repository"
 )
-
-type ResponseUser[T any] struct {
-	Timestamp string `json:"timestamp"`
-	Status    int16  `json:"status"`
-	Data      T      `json:"data"`
-}
-
-type ResponseSucess struct {
-	Timestamp string `json:"timestamp"`
-	Status    int16  `json:"status"`
-	Message   string `json:"message"`
-}
-
-type ResponseError struct {
-	Timestamp string `json:"timestamp"`
-	Status    int16  `json:"status"`
-	Error     string `json:"error"`
-}
 
 type Controller struct {
 	repository repository.IUserRepository
@@ -41,7 +24,7 @@ func (c Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	users, err := c.repository.FindAll()
 
 	if err != nil {
-		responseError := ResponseError{
+		responseError := dto.ResponseError{
 			Timestamp: time.Now().String(),
 			Status:    500,
 			Error:     err.Error(),
@@ -50,7 +33,7 @@ func (c Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := ResponseUser[[]entity.User]{
+	response := dto.ResponseUser[[]entity.User]{
 		Timestamp: time.Now().String(),
 		Status:    200,
 		Data:      users,
@@ -64,7 +47,7 @@ func (c Controller) Save(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
-		responseError := ResponseError{
+		responseError := dto.ResponseError{
 			Timestamp: time.Now().String(),
 			Status:    500,
 			Error:     err.Error(),
@@ -75,7 +58,7 @@ func (c Controller) Save(w http.ResponseWriter, r *http.Request) {
 
 	id, err := c.repository.Save(body)
 	if err != nil {
-		responseError := ResponseError{
+		responseError := dto.ResponseError{
 			Timestamp: time.Now().String(),
 			Status:    500,
 			Error:     err.Error(),
@@ -97,7 +80,7 @@ func (c Controller) Delete(w http.ResponseWriter, r *http.Request) {
 
 	err := c.repository.Delete(id)
 	if err != nil {
-		responseError := ResponseError{
+		responseError := dto.ResponseError{
 			Timestamp: time.Now().String(),
 			Status:    500,
 			Error:     err.Error(),
@@ -106,7 +89,7 @@ func (c Controller) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := ResponseSucess{
+	res := dto.ResponseSucess{
 		Timestamp: time.Now().String(),
 		Status:    200,
 		Message:   "User Removed",
@@ -120,7 +103,7 @@ func (c Controller) Edit(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
-		responseError := ResponseError{
+		responseError := dto.ResponseError{
 			Timestamp: time.Now().String(),
 			Status:    500,
 			Error:     err.Error(),
@@ -131,7 +114,7 @@ func (c Controller) Edit(w http.ResponseWriter, r *http.Request) {
 
 	errUpdate := c.repository.Update(body, id)
 	if errUpdate != nil {
-		responseError := ResponseError{
+		responseError := dto.ResponseError{
 			Timestamp: time.Now().String(),
 			Status:    500,
 			Error:     errUpdate.Error(),
@@ -140,7 +123,7 @@ func (c Controller) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := ResponseSucess{
+	res := dto.ResponseSucess{
 		Timestamp: time.Now().String(),
 		Status:    200,
 		Message:   "User Edited",
